@@ -1,12 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { PaginationDto } from 'src/helper/pagination.dto';
 
 @Controller('category')
 @ApiTags('Category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) { }
+  constructor(private readonly categoryService: CategoryService) {}
 
   /** create new category */
   @Post('/new')
@@ -16,8 +26,8 @@ export class CategoryController {
 
   /** get all category */
   @Get('/')
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(@Query() query: PaginationDto) {
+    return this.categoryService.findAll(query);
   }
 
   /** get single category by id*/

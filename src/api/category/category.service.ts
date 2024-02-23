@@ -1,50 +1,74 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/helper/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { PaginationDto } from 'src/helper/pagination.dto';
 
 @Injectable()
 export class CategoryService {
-  constructor(
-    private prisma: PrismaService
-  ) { }
+  constructor(private prisma: PrismaService) {}
 
   /** create new category */
   async create(data: CreateCategoryDto) {
     try {
-      const isExits = await this.prisma.category.findUnique({ where: { name: data.name.trim() } });
+      const isExits = await this.prisma.category.findUnique({
+        where: { name: data.name.trim() },
+      });
       if (isExits) {
-        throw new HttpException('Category already exits.', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'Category already exits.',
+          HttpStatus.BAD_REQUEST,
+        );
       }
       const result = await this.prisma.category.create({
         data: {
-          name: data.name.trim()
-        }
+          name: data.name.trim(),
+        },
       });
       return {
         statusCode: HttpStatus.CREATED,
         message: 'category has been created successfully',
-        data: result
+        data: result,
       };
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   /** get all category */
-  async findAll() {
+  async findAll(query: PaginationDto) {
     try {
-      const result = await this.prisma.category.findMany();
+      const take = Number(query.limit) || 10;
+      const skip = Number(query.page - 1) * take || 0;
+
+      const result = await this.prisma.category.findMany({
+        skip: skip,
+        take: take,
+      });
+
+      const count = await this.prisma.category.count();
       return {
         statusCode: HttpStatus.CREATED,
         message: 'success',
-        data: result
+        data: result,
+        totalRecords: count,
       };
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-   /** get single category by id*/
+  /** get single category by id*/
   async findOneById(id: number) {
     try {
       const result = await this.prisma.category.findUnique({ where: { id } });
@@ -54,10 +78,13 @@ export class CategoryService {
       return {
         statusCode: HttpStatus.CREATED,
         message: 'success',
-        data: result
+        data: result,
       };
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -74,11 +101,14 @@ export class CategoryService {
         message: 'category updated successfully',
       };
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
-  
- /** delete category by id*/
+
+  /** delete category by id*/
   async remove(id: number) {
     try {
       const isExits = await this.prisma.category.findUnique({ where: { id } });
@@ -91,7 +121,10 @@ export class CategoryService {
         message: 'category deleted successfully',
       };
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

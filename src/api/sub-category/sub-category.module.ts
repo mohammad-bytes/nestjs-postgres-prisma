@@ -5,6 +5,6 @@ import { PrismaService } from 'src/helper/prisma.service';
 
 @Module({
   controllers: [SubCategoryController],
-  providers: [SubCategoryService,PrismaService],
+  providers: [SubCategoryService, PrismaService],
 })
 export class SubCategoryModule {}
